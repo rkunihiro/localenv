@@ -1,0 +1,83 @@
+version: "3.9"
+
+services:
+  # AWS (localstack) container
+  # https://hub.docker.com/r/localstack/localstack
+  aws:
+    container_name: localenv-container-aws
+    image: localstack/localstack:latest
+    environment:
+      EDGE_PORT: 4566
+      SERVICES: "dynamodb,s3"
+      DEFAULT_REGION: us-east-1
+      TMPDIR: /tmp
+      DATA_DIR: /tmp/localstack/data
+      TZ: Z
+    networks:
+      - default
+    ports:
+      - 4566:4566
+    volumes:
+      - ./docker/aws/data:/tmp/localstack/data:rw
+
+  # DB (MySQL/MariaDB) container
+  # https://hub.docker.com/_/mysql
+  # https://hub.docker.com/_/mariadb
+  db:
+    container_name: localenv-container-db
+    image: mysql:8.0.24
+    # image: mariadb:10.5.9
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: dbname
+      MYSQL_USER: username
+      MYSQL_PASSWORD: password
+      TZ: Z
+    networks:
+      - default
+    ports:
+      - 3306:3306
+    volumes:
+      - ./docker/db/conf:/etc/mysql/conf.d:ro
+      - ./docker/db/init:/docker-entrypoint-initdb.d:ro
+      - ./docker/db/logs:/var/log/mysql:rw
+      - ./docker/db/data:/var/lib/mysql:rw
+
+  # MongoDB container
+  # https://hub.docker.com/_/mongo
+  mongo:
+    container_name: localenv-container-mongo
+    image: mongo:4.4.5-bionic
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: test
+      TZ: Z
+    networks:
+      - default
+    ports:
+      - 27017:27017
+    volumes:
+      - ./docker/mongo/init:/docker-entrypoint-initdb.d:ro
+      - ./docker/mongo/data:/data/db:rw
+
+  # Redis container
+  # https://hub.docker.com/_/redis
+  # https://redis.io/topics/config
+  redis:
+    container_name: localenv-container-redis
+    image: redis:6.2.2-buster
+    environment:
+      TZ: Z
+    networks:
+      - default
+    ports:
+      - 6379:6379
+    volumes:
+      - ./docker/redis/conf:/etc/redis
+      - ./docker/redis/data:/data:rw
+    command: [redis-server, /etc/redis/redis.conf]
+
+networks:
+  default:
+    name: localenv-network-default
