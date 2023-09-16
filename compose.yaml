@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   # AWS (localstack) container
   # https://hub.docker.com/r/localstack/localstack
@@ -7,12 +5,13 @@ services:
     container_name: localenv-container-aws
     image: localstack/localstack:latest
     environment:
+      LANG: C.UTF-8
+      TZ: Z
       EDGE_PORT: 4566
-      SERVICES: "dynamodb,s3"
+      SERVICES: 'dynamodb,s3'
       DEFAULT_REGION: us-east-1
       TMPDIR: /tmp
       DATA_DIR: /tmp/localstack/data
-      TZ: Z
     networks:
       - default
     ports:
@@ -28,11 +27,12 @@ services:
     image: mysql:8.0.24
     # image: mariadb:10.5.9
     environment:
+      LANG: C.UTF-8
+      TZ: Z
       MYSQL_ROOT_PASSWORD: password
       MYSQL_DATABASE: dbname
       MYSQL_USER: username
       MYSQL_PASSWORD: password
-      TZ: Z
     networks:
       - default
     ports:
@@ -49,10 +49,11 @@ services:
     container_name: localenv-container-mongo
     image: mongo:4.4.5-bionic
     environment:
+      LANG: C.UTF-8
+      TZ: Z
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: password
       MONGO_INITDB_DATABASE: test
-      TZ: Z
     networks:
       - default
     ports:
@@ -68,6 +69,7 @@ services:
     container_name: localenv-container-redis
     image: redis:6.2.2-buster
     environment:
+      LANG: C.UTF-8
       TZ: Z
     networks:
       - default
