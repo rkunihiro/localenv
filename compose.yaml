@@ -51,7 +51,9 @@ services:
   # https://hub.docker.com/_/mongo
   mongo:
     container_name: localenv-container-mongo
-    image: mongo:6.0.10-jammy
+    # image: mongo:7.0.1-jammy
+    # image: mongo:5.0.21-focal
+    image: mongo:4.4.24-focal
     platform: linux/amd64
     environment:
       LANG: C.UTF-8
@@ -65,7 +67,6 @@ services:
       - 27017:27017
     volumes:
       - ./docker/mongo/init:/docker-entrypoint-initdb.d:ro
-      - ./docker/mongo/data:/data/db:rw
 
   # Redis container
   # https://hub.docker.com/_/redis

@@ -15,7 +15,7 @@ db.books.insertMany([
     {
         isbn: "4873112699",
         title: "GNU Make",
-        auther: "Robert Mecklenburg",
+        author: "Robert Mecklenburg",
         publisher: "O'REILLY",
     },
 ]);
