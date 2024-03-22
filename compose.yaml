@@ -3,7 +3,7 @@ services:
   # https://hub.docker.com/r/localstack/localstack
   aws:
     container_name: localenv-container-aws
-    image: localstack/localstack:2.2.0
+    image: localstack/localstack:3.2.0-amd64
     platform: linux/amd64
     environment:
       LANG: C.UTF-8
@@ -11,6 +11,7 @@ services:
       # EAGER_SERVICE_LOADING: "1"
       # SERVICES: dynamodb,kms,s3
       # DEBUG: 1
+      AWS_ENDPOINT_URL: http://localhost:4566
       AWS_ACCESS_KEY_ID: test
       AWS_SECRET_ACCESS_KEY: test
       AWS_DEFAULT_REGION: ap-northeast-1
@@ -27,8 +28,8 @@ services:
   # https://hub.docker.com/_/mariadb
   db:
     container_name: localenv-container-db
-    image: mysql:8.1.0
-    # image: mariadb:11.1.2-jammy
+    image: mysql:8.3.0-oraclelinux8
+    # image: mariadb:11.3.2-jammy
     platform: linux/amd64
     environment:
       LANG: C.UTF-8
@@ -51,9 +52,9 @@ services:
   # https://hub.docker.com/_/mongo
   mongo:
     container_name: localenv-container-mongo
-    # image: mongo:7.0.1-jammy
-    # image: mongo:5.0.21-focal
-    image: mongo:4.4.24-focal
+    # image: mongo:7.0.7-jammy
+    image: mongo:5.0.25-focal
+    # image: mongo:4.4.29-focal
     platform: linux/amd64
     environment:
       LANG: C.UTF-8
@@ -73,7 +74,7 @@ services:
   # https://redis.io/topics/config
   redis:
     container_name: localenv-container-redis
-    image: redis:7.2.1-bookworm
+    image: redis:7.2.4-bookworm
     platform: linux/amd64
     environment:
       LANG: C.UTF-8
@@ -86,6 +87,29 @@ services:
     #   - ./docker/redis/conf:/etc/redis
     #   - ./docker/redis/data:/data:rw
     # command: [redis-server, /etc/redis/redis.conf]
+
+  # Golang container
+  # https://hub.docker.com/_/golang
+  golang:
+    container_name: localenv-container-golang
+    image: golang:1.22.1-bullseye
+    platform: linux/amd64
+    environment:
+      LANG: C.UTF-8
+      TZ: Z
+      AWS_ENDPOINT_URL: http://aws:4566
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AWS_DEFAULT_REGION: ap-northeast-1
+      DATABASE_DSN: "username:password@tcp(db:3306)/dbname?parseTime=true&loc=Asia%2FTokyo"
+      MONGODB_URI: "mongodb://username:password@mongo:27017/test"
+      REDIS_ADDR: "redis:6379"
+    networks:
+      - default
+    volumes:
+      - ./golang:/app:rw
+    working_dir: /app
+    tty: true
 
 networks:
   default:
