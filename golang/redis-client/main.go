@@ -4,10 +4,13 @@ import (
 	"context"
 	"log/slog"
 	"os"
+	"strings"
 	"time"
 
 	redis "github.com/redis/go-redis/v9"
 )
+
+var redisAddrs = os.Getenv("REDIS_ADDR")
 
 func main() {
 	log := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{})).With("module", "redis-client")
@@ -17,14 +20,14 @@ func main() {
 	ctx := context.TODO()
 
 	client := redis.NewUniversalClient(&redis.UniversalOptions{
-		Addrs: []string{"localhost:6379"},
+		Addrs: strings.Split(redisAddrs, ","),
 	})
 
 	key := "key"
 
 	value := time.Now().Format(time.RFC3339)
 	if err := client.SetEx(ctx, key, value, time.Second*3).Err(); err != nil {
-		log.Error("SetEx failed", "err", err.Error())
+		log.Error("SetEx failed", slog.Any("error", err))
 		os.Exit(1)
 	}
 	log.Info("SetEx success")
@@ -35,11 +38,11 @@ func main() {
 		if err == redis.Nil {
 			log.Info("Get (after 2sec) Not found")
 		} else {
-			log.Error("Get (after 2sec) failed", "err", err.Error())
+			log.Error("Get (after 2sec) failed", slog.Any("error", err))
 			os.Exit(1)
 		}
 	} else {
-		log.Info("Get (after 2sec) success", "value", value)
+		log.Info("Get (after 2sec) success", slog.Any("value", value))
 	}
 
 	time.Sleep(time.Second * 2)
@@ -48,11 +51,11 @@ func main() {
 		if err == redis.Nil {
 			log.Info("Get (after 4sec) Not found")
 		} else {
-			log.Error("Get (after 4sec) failed", "err", err.Error())
+			log.Error("Get (after 4sec) failed", slog.Any("error", err))
 			os.Exit(1)
 		}
 	} else {
-		log.Info("Get (after 4sec) success", "value", value)
+		log.Info("Get (after 4sec) success", slog.Any("value", value))
 	}
 
 	os.Exit(0)

@@ -18,31 +18,30 @@ type Book struct {
 	Publisher string `json:"publisher"`
 }
 
+var mongoURI = os.Getenv("MONGODB_URI")
+
 func main() {
 	log := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{})).With("module", "mongo-client")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
-	client, err := mongo.Connect(
-		ctx,
-		options.Client().ApplyURI("mongodb://username:password@localhost:27017/test"),
-	)
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(mongoURI))
 	if err != nil {
-		log.Error("mongo.Connect failed", "err", err.Error())
+		log.Error("mongo.Connect failed", slog.Any("error", err))
 		os.Exit(1)
 	}
 	log.Info("mongo.Connect success")
 
 	defer func() {
 		if err := client.Disconnect(ctx); err != nil {
-			log.Error("client.Disconnect failed", "err", err.Error())
+			log.Error("client.Disconnect failed", slog.Any("error", err))
 			os.Exit(1)
 		}
 		log.Info("client.Disconnect success")
 	}()
 
 	if err := client.Ping(ctx, nil); err != nil {
-		log.Error("client.Ping failed", "err", err.Error())
+		log.Error("client.Ping failed", slog.Any("error", err))
 		os.Exit(1)
 	} else {
 		log.Info("client.Ping success")
@@ -54,8 +53,8 @@ func main() {
 
 	book := &Book{}
 	if err := collection.FindOne(context.TODO(), bson.D{{"isbn", "4873112699"}}).Decode(book); err != nil {
-		log.Error("collection.FindOne failed", "err", err.Error())
+		log.Error("collection.FindOne failed", slog.Any("error", err))
 		os.Exit(1)
 	}
-	log.Info("collection.FindOne success", "book", book)
+	log.Info("collection.FindOne success", slog.Any("book", book))
 }
